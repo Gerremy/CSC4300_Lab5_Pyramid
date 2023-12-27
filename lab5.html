@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Spinning Pyramid</title>
+
+<script src="https://csc-vu.github.io/lib/three.js"></script>
+
+<!-- Modified from the vertex-groups.html example in our textbook 
+    (Introduction to Computer Graphics) by David J. Eck -->
+
+<script>
+    var scene, camera, renderer; // Three.js rendering basics
+    var canvas; // The canvas on which the image is rendered
+    var pyramid;
+
+    // Create a camera, sitting on the positive z-axis.  The camera is not part of the scene
+    function createCamera() {
+        // TODO 4: create a camera here
+        camera = new THREE.PerspectiveCamera(50, canvas.width/canvas.height, 0.1, 2000);
+        camera.position.z = (0, 0, 8);
+
+    }
+
+    function createPyramid() {
+        // Set up the geometry for our pyramid
+        var pyramidGeom = new THREE.Geometry();
+    
+        // TODO 5: create the (x,y,z) points for the 5 vertices of our pyramid
+        pyramidGeom.vertices = [  // array of Vector3 giving vertex coordinates
+            new THREE.Vector3(1, 0, 1),  // vertex number 0
+            new THREE.Vector3(1, 0, -1),  // vertex number 1
+            new THREE.Vector3(-1, 0, -1),  // vertex number 2
+            new THREE.Vector3(-1, 0, 1),  // vertex number 3
+
+            new THREE.Vector3(0, 1, 0)   // vertex number 4
+        ];
+        
+        // TODO 6: using the indices of the vertices above, create triangular faces
+        pyramidGeom.faces = [  // array of Face3 giving the triangular faces
+            new THREE.Face3(3, 2, 1),  // one half of the bottom face
+            new THREE.Face3(3, 1, 0),  // other half of the bottom face
+            new THREE.Face3(0, 4, 3),  // remaining faces are the four sides
+            new THREE.Face3(0, 1, 4),
+            new THREE.Face3(2, 4, 1),
+            new THREE.Face3(2, 3, 4)
+        ];
+    
+        // Compute normals so we know which way is facing "out"
+        pyramidGeom.computeFaceNormals();
+    
+        // Create a material for the pyramid (faces should be colored differently)
+        // TODO 7: Use either THREE.MeshNormalMaterial to map normals to colors
+        //         or create a different material for each face with THREE.MeshBasicMaterial 
+
+        var pyramidMat = [ // an array of Materials
+            new THREE.MeshBasicMaterial( {color: "lightblue"} ),   // bottom face
+            new THREE.MeshBasicMaterial( {color: "lightyellow"} ),  // side faces
+            new THREE.MeshBasicMaterial( {color: "pink"} ),  
+            new THREE.MeshBasicMaterial( {color: "lightgreen"} ),  
+            new THREE.MeshBasicMaterial( {color: "lightgrey"} ), 
+        ]; 
+
+        pyramidGeom.faces[0].materialIndex = 0;
+        for (var i = 1; i <= 5; i++) {
+            pyramidGeom.faces[i].materialIndex = i-1;
+        }
+    
+        // Create the pyramid using the geometry and materials we've set up
+        var pyramid = new THREE.Mesh(pyramidGeom, pyramidMat);
+        return pyramid;
+    }
+
+    // Create the scene. This function is called once, as soon as the page loads
+    // The renderer has already been created before this function is called
+    function createScene() {
+        
+        renderer.setClearColor(0); // Set background color (0, or 0x000000, is black)
+        scene = new THREE.Scene(); // Create a new scene which we can add objects to
+        
+        // TODO 8: create the pyramid object and add it to the scene
+        pyramid = createPyramid();
+        pyramid.rotation.set(0.5, 0.2, 0);
+        scene.add(pyramid);
+    }
+
+    // Render the scene. This is called for each frame of the animation
+    function render() {
+
+        // TODO 9: add code to spin the pyramid
+
+        renderer.render(scene, camera);
+
+        // things that change go here (pyramid orientation, for instance)
+        pyramid.rotation.y += 0.05;
+
+        // schedule the next render
+        requestAnimationFrame( render );
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // The main() function is called by the onload event when the document has loaded
+    function main() {
+        try {
+            canvas = document.getElementById("glcanvas");
+            renderer = new THREE.WebGLRenderer( { canvas: canvas, antialias: true} );
+        }
+        catch (e) {
+            document.getElementById("canvas-holder").innerHTML = "<h3><b>WebGL is not available.</b><h3>";
+            return;
+        }
+    
+        // create camera
+        createCamera();
+        
+        // create scene 
+        createScene();
+
+        // render scene
+        render();
+    }
+
+</script>
+
+</head>
+<body onload="main()">
+<div id="canvas-holder">
+    <canvas id="glcanvas" width="600" height="300"></canvas>
+</div>
+</body>
+</html>
